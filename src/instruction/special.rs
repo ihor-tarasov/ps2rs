@@ -1,4 +1,4 @@
-use crate::{EmotionEngine, Error, Result, instruction::Instruction};
+use crate::{EmotionEngine, Error, Result, instruction::Instruction, trace_asm};
 
 pub fn execute(cpu: &mut EmotionEngine, instruction: Instruction) -> Result {
     match instruction.funct() {
@@ -11,7 +11,7 @@ fn sll(cpu: &mut EmotionEngine, instruction: Instruction) -> Result {
     let src = instruction.rt();
     let dst = instruction.rd();
     let shift = instruction.shamt();
-    log::info!(
+    trace_asm!(
         "sll ${}, ${}, {shift}",
         EmotionEngine::GPR_NAMES[dst as usize],
         EmotionEngine::GPR_NAMES[src as usize]

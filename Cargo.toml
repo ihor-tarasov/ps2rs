@@ -3,14 +3,12 @@ name = "ps2rs"
 version = "0.1.0"
 edition = "2024"
 
-[dependencies]
-simple_logger = "5"
-anyhow = "1"
-bytemuck = "1"
+[features]
+default = ["trace_asm"]
+trace_asm = []
 
-[dependencies.log]
-version = "0.4"
-features = ["release_max_level_warn"]
+[dependencies]
+bytemuck = "1"
 
 # Enable a small amount of optimization in the dev profile.
 # [profile.dev]

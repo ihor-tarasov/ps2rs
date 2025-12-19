@@ -3,6 +3,18 @@ mod special;
 
 use crate::{EmotionEngine, Error, Result};
 
+#[macro_export]
+macro_rules! trace_asm {
+    () => {
+        #[cfg(feature = "trace_asm")]
+        println!()
+    };
+    ($($arg:tt)*) => {{
+        #[cfg(feature = "trace_asm")]
+        println!($($arg)*);
+    }};
+}
+
 /*
         24       16        8        0
          |        |        |        |
@@ -74,7 +86,7 @@ impl Instruction {
         let imm = self.immediate() as i16 as i64;
         let dst = self.rt();
         let src = self.rs();
-        log::info!(
+        trace_asm!(
             "slti ${}, ${}, {imm}",
             EmotionEngine::GPR_NAMES[dst as usize],
             EmotionEngine::GPR_NAMES[src as usize]

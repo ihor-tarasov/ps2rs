@@ -1,4 +1,4 @@
-use crate::{EmotionEngine, Error, Result, instruction::Instruction};
+use crate::{EmotionEngine, Error, Result, instruction::Instruction, trace_asm};
 
 pub fn execute(cpu: &mut EmotionEngine, instruction: Instruction) -> Result {
     let opcode = instruction.rs();
@@ -11,8 +11,8 @@ pub fn execute(cpu: &mut EmotionEngine, instruction: Instruction) -> Result {
 fn mfc0(cpu: &mut EmotionEngine, instruction: Instruction) -> Result {
     let cpu_register = instruction.rt();
     let cop_register = instruction.rd();
-    log::info!(
-        "mfc0 ${} ${cop_register}",
+    trace_asm!(
+        "mfc0 ${}, ${cop_register}",
         EmotionEngine::GPR_NAMES[cpu_register as usize],
     );
     cpu.mfc0(cpu_register, cop_register);

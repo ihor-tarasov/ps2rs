@@ -1,11 +1,10 @@
 use ps2rs::{Bus, EmotionEngine};
 
-fn main() -> anyhow::Result<()> {
-    simple_logger::init()?;
-
+fn main() {
     // Load bios from file
     let bios = std::fs::read("bios.bin")
-        .map_err(|error| anyhow::anyhow!("Failed to read \"bios.bin\", error: {error}"))?;
+        .map_err(|error| format!("Failed to read \"bios.bin\", error: {error}"))
+        .unwrap();
 
     // Setup bus
     let mut bus = Bus { bios: &bios };
