@@ -95,11 +95,7 @@ impl Instruction {
         let rt = self.rt();
         let a = cpu.read_gpr::<u32>(rs, 0);
         let b = cpu.read_gpr::<u32>(rt, 0);
-        trace_asm!(
-            "bne ${}, ${}, {imm}",
-            Self::gpr_name(rs),
-            Self::gpr_name(rt),
-        );
+        trace_asm!("bne ${}, ${}, {imm}", gpr_name(rs), gpr_name(rt));
         cpu.branch(
             a != b,
             cpu.pc()
@@ -113,11 +109,7 @@ impl Instruction {
         let imm = self.immediate() as i16 as i32;
         let dst = self.rt();
         let src = self.rs();
-        trace_asm!(
-            "slti ${}, ${}, {imm}",
-            Self::gpr_name(dst),
-            Self::gpr_name(src),
-        );
+        trace_asm!("slti ${}, ${}, {imm}", gpr_name(dst), gpr_name(src));
         let value = cpu.read_gpr::<i32>(src, 0);
         let result = if value < imm { 1 } else { 0 };
         cpu.write_gpr(dst, result as i64, 0);
@@ -128,11 +120,7 @@ impl Instruction {
         let imm = self.immediate();
         let dst = self.rt();
         let src = self.rs();
-        trace_asm!(
-            "ori ${}, ${}, ${imm:04X}",
-            Self::gpr_name(dst),
-            Self::gpr_name(src),
-        );
+        trace_asm!("ori ${}, ${}, ${imm:04X}", gpr_name(dst), gpr_name(src));
         let result = cpu.read_gpr::<u32>(src, 0) | imm as u32;
         cpu.write_gpr::<u32>(dst, result, 0);
         Ok(())
@@ -142,7 +130,7 @@ impl Instruction {
         let imm = self.immediate();
         let dst = self.rt();
 
-        trace_asm!("lui ${}, ${imm:04X}", Self::gpr_name(dst));
+        trace_asm!("lui ${}, ${imm:04X}", gpr_name(dst));
 
         // LUI places imm in bits 31..16, lower 16 bits are zero.
         // The 32-bit result is then sign-extended when written to the GPR.
@@ -151,8 +139,8 @@ impl Instruction {
         cpu.write_gpr::<i32>(dst, value, 0);
         Ok(())
     }
+}
 
-    fn gpr_name(index: u8) -> &'static str {
-        EmotionEngine::GPR_NAMES[index as usize]
-    }
+fn gpr_name(index: u8) -> &'static str {
+    EmotionEngine::GPR_NAMES[index as usize]
 }
