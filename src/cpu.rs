@@ -81,6 +81,11 @@ impl EmotionEngine {
         self.write_gpr_u32(register, value);
     }
 
+    pub fn mtc0(&mut self, register: u8, cop_register: u8) {
+        let value = self.read_gpr_u32(register);
+        self.cop0.mtc(cop_register, value);
+    }
+
     pub const fn read_gpr_u32(&mut self, index: u8) -> u32 {
         self.gpr[index as usize] as u32
     }
