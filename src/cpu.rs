@@ -58,7 +58,7 @@ impl EmotionEngine {
         Ok(())
     }
 
-    pub const fn read4(&self, bus: &Bus, address: u32) -> Result<[u8; 4]> {
+    pub fn read4(&self, bus: &Bus, address: u32) -> Result<[u8; 4]> {
         bus.read4(address & 0x1FFF_FFFF)
     }
 

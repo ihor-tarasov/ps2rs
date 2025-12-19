@@ -1,13 +1,15 @@
+use std::fs::File;
+
 use ps2rs::{Bus, EmotionEngine};
 
 fn main() {
-    // Load bios from file
-    let bios = std::fs::read("bios.bin")
-        .map_err(|error| format!("Failed to read \"bios.bin\", error: {error}"))
-        .unwrap();
-
     // Setup bus
-    let mut bus = Bus { bios: &bios };
+    let mut bios = File::open("bios.bin")
+        .map_err(|error| format!("Failed to open bios.bin file, error: {error}"))
+        .unwrap();
+    let mut bus = Bus::new(&mut bios)
+        .map_err(|error| format!("Failed to read bios.bin file, error: {error}"))
+        .unwrap();
 
     // Setup cpu
     let mut cpu = EmotionEngine::default();
