@@ -64,8 +64,19 @@ impl Instruction {
     pub fn execute(self, cpu: &mut EmotionEngine) -> Result {
         match self.opcode() {
             0x00 => special::execute(cpu, self),
+            0x0A => self.slti(cpu),
             0x10 => cop0::execute(cpu, self),
             opcode => Err(Error::Opcode(opcode)),
         }
+    }
+
+    fn slti(self, cpu: &mut EmotionEngine) -> Result {
+        let imm = self.immediate() as i16 as i64;
+        let dst = self.rt();
+        let src = self.rs();
+        log::info!("slti {{{dst}}}, {{{src}}}, {imm}");
+        let value = cpu.read_gpr::<i64>(src, 0);
+        cpu.write_gpr(dst, (value < imm) as i64, 0);
+        Ok(())
     }
 }
