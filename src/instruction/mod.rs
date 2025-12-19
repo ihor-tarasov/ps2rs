@@ -97,8 +97,8 @@ impl Instruction {
         let imm = self.immediate();
         let rs = self.rs();
         let rt = self.rt();
-        let a = cpu.read_gpr::<u32>(rs, 0);
-        let b = cpu.read_gpr::<u32>(rt, 0);
+        let a = cpu.read_gpr_u32(rs);
+        let b = cpu.read_gpr_u32(rt);
         trace_asm!("bne ${}, ${}, {imm}", gpr_name(rs), gpr_name(rt));
         cpu.branch(
             a != b,
@@ -114,9 +114,9 @@ impl Instruction {
         let dst = self.rt();
         let src = self.rs();
         trace_asm!("slti ${}, ${}, {imm}", gpr_name(dst), gpr_name(src));
-        let value = cpu.read_gpr::<i32>(src, 0);
+        let value = cpu.read_gpr_i32(src);
         let result = if value < imm { 1 } else { 0 };
-        cpu.write_gpr(dst, result as i64, 0);
+        cpu.write_gpr_i64(dst, result as i64);
         Ok(())
     }
 
@@ -125,8 +125,8 @@ impl Instruction {
         let dst = self.rt();
         let src = self.rs();
         trace_asm!("ori ${}, ${}, ${imm:04X}", gpr_name(dst), gpr_name(src));
-        let result = cpu.read_gpr::<u32>(src, 0) | imm as u32;
-        cpu.write_gpr::<u32>(dst, result, 0);
+        let result = cpu.read_gpr_u32(src) | imm as u32;
+        cpu.write_gpr_u32(dst, result);
         Ok(())
     }
 
@@ -140,7 +140,7 @@ impl Instruction {
         // The 32-bit result is then sign-extended when written to the GPR.
         let value = ((imm as u32) << 16) as i32;
 
-        cpu.write_gpr::<i32>(dst, value, 0);
+        cpu.write_gpr_i32(dst, value);
         Ok(())
     }
 }

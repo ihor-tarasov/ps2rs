@@ -3,7 +3,7 @@ use crate::{Bus, Coprocessor0, Instruction, Result};
 pub struct EmotionEngine {
     pc: u32,
     cop0: Coprocessor0,
-    gpr: [u128; Self::REGISTERS_COUNT],
+    gpr: [u64; Self::REGISTERS_COUNT],
     branch: bool,
     delay: u8,
     next_pc: u32,
@@ -78,21 +78,47 @@ impl EmotionEngine {
 
     pub fn mfc0(&mut self, register: u8, cop_register: u8) {
         let value = self.cop0.mfc(cop_register);
-        self.write_gpr::<u32>(register, value, 0);
+        self.write_gpr_u32(register, value);
     }
 
-    pub fn read_gpr<T>(&mut self, index: u8, offset: u8) -> T
-    where
-        T: bytemuck::AnyBitPattern,
-    {
-        bytemuck::cast_slice::<_, T>(&[self.gpr[index as usize]])[offset as usize]
+    pub const fn read_gpr_u32(&mut self, index: u8) -> u32 {
+        self.gpr[index as usize] as u32
     }
 
-    pub fn write_gpr<T>(&mut self, index: u8, value: T, offset: u8)
-    where
-        T: bytemuck::NoUninit + bytemuck::AnyBitPattern,
-    {
-        bytemuck::cast_slice_mut::<_, T>(&mut [self.gpr[index as usize]])[offset as usize] = value;
+    pub const fn read_gpr_i32(&mut self, index: u8) -> i32 {
+        self.gpr[index as usize] as i32
+    }
+
+    pub const fn read_gpr_u64(&mut self, index: u8) -> u64 {
+        self.gpr[index as usize]
+    }
+
+    pub const fn read_gpr_i64(&mut self, index: u8) -> i64 {
+        self.gpr[index as usize] as i64
+    }
+
+    pub const fn write_gpr_u32(&mut self, index: u8, value: u32) {
+        if index != 0 {
+            self.gpr[index as usize] = value as u64;
+        }
+    }
+
+    pub const fn write_gpr_i32(&mut self, index: u8, value: i32) {
+        if index != 0 {
+            self.gpr[index as usize] = value as i64 as u64;
+        }
+    }
+
+    pub const fn write_gpr_u64(&mut self, index: u8, value: u64) {
+        if index != 0 {
+            self.gpr[index as usize] = value;
+        }
+    }
+
+    pub const fn write_gpr_i64(&mut self, index: u8, value: i64) {
+        if index != 0 {
+            self.gpr[index as usize] = value as u64;
+        }
     }
 
     pub const GPR_NAMES: [&'static str; 32] = [
