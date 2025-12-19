@@ -13,7 +13,7 @@ fn mfc0(cpu: &mut EmotionEngine, instruction: Instruction) -> Result {
     let cop_register = instruction.rd();
     trace_asm!(
         "mfc0 ${}, ${cop_register}",
-        EmotionEngine::GPR_NAMES[cpu_register as usize],
+        Instruction::gpr_name(cpu_register),
     );
     cpu.mfc0(cpu_register, cop_register);
     Ok(())

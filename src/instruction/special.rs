@@ -13,8 +13,8 @@ fn sll(cpu: &mut EmotionEngine, instruction: Instruction) -> Result {
     let shift = instruction.shamt();
     trace_asm!(
         "sll ${}, ${}, {shift}",
-        EmotionEngine::GPR_NAMES[dst as usize],
-        EmotionEngine::GPR_NAMES[src as usize]
+        Instruction::gpr_name(dst),
+        Instruction::gpr_name(src),
     );
     let mut value = cpu.read_gpr::<u32>(src, 0) as u64;
     value <<= shift;

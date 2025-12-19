@@ -88,11 +88,15 @@ impl Instruction {
         let src = self.rs();
         trace_asm!(
             "slti ${}, ${}, {imm}",
-            EmotionEngine::GPR_NAMES[dst as usize],
-            EmotionEngine::GPR_NAMES[src as usize]
+            Self::gpr_name(dst),
+            Self::gpr_name(src),
         );
         let value = cpu.read_gpr::<i64>(src, 0);
         cpu.write_gpr(dst, (value < imm) as i64, 0);
         Ok(())
+    }
+
+    fn gpr_name(index: u8) -> &'static str {
+        EmotionEngine::GPR_NAMES[index as usize]
     }
 }
