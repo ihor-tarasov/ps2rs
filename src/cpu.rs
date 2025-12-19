@@ -4,6 +4,9 @@ pub struct EmotionEngine {
     pc: u32,
     cop0: Coprocessor0,
     gpr: [u128; Self::REGISTERS_COUNT],
+    branch: bool,
+    delay: u8,
+    next_pc: u32,
 }
 
 impl Default for EmotionEngine {
@@ -31,18 +34,40 @@ impl EmotionEngine {
             pc: Self::PC_START,
             cop0,
             gpr: [0; Self::REGISTERS_COUNT],
+            branch: false,
+            delay: 0,
+            next_pc: 0,
         }
     }
 
+    pub fn pc(&self) -> u32 {
+        self.pc
+    }
+
     pub fn step(&mut self, bus: &mut Bus) -> Result {
+        if self.delay != 0 {
+            self.delay -= 1;
+        } else if self.branch {
+            self.pc = self.next_pc;
+            self.branch = false;
+        }
         let instruction = Instruction::from_le_bytes(self.read4(bus, self.pc)?);
         instruction.execute(self)?;
+        self.cop0.increment_count();
         self.pc += 4;
         Ok(())
     }
 
     pub const fn read4(&self, bus: &Bus, address: u32) -> Result<[u8; 4]> {
         bus.read4(address & 0x1FFF_FFFF)
+    }
+
+    pub fn branch(&mut self, condition: bool, address: u32) {
+        if condition {
+            self.branch = true;
+            self.next_pc = address;
+            self.delay = 1;
+        }
     }
 
     pub fn mfc0(&mut self, register: u8, cop_register: u8) {

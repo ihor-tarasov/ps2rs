@@ -111,4 +111,8 @@ impl Coprocessor0 {
     pub const fn mtc(&mut self, index: u8, value: u32) {
         self.registers[index as usize] = value;
     }
+
+    pub const fn increment_count(&mut self) {
+        self.registers[Self::COUNT as usize] += 1;
+    }
 }

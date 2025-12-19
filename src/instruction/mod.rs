@@ -76,14 +76,39 @@ impl Instruction {
     pub fn execute(self, cpu: &mut EmotionEngine) -> Result {
         match self.opcode() {
             0x00 => special::execute(cpu, self),
+            0x05 => self.bne(cpu),
             0x0A => self.slti(cpu),
             0x10 => cop0::execute(cpu, self),
             opcode => Err(Error::Opcode(opcode)),
         }
     }
 
+    pub const fn sign_extend(value: u16) -> i32 {
+        value as i16 as i32
+    }
+
+    fn bne(self, cpu: &mut EmotionEngine) -> Result {
+        let imm = self.immediate();
+        let rs = self.rs();
+        let rt = self.rt();
+        let a = cpu.read_gpr::<u32>(rs, 0);
+        let b = cpu.read_gpr::<u32>(rt, 0);
+        trace_asm!(
+            "bne ${}, ${}, {imm}",
+            Self::gpr_name(rs),
+            Self::gpr_name(rt),
+        );
+        cpu.branch(
+            a != b,
+            cpu.pc()
+                .wrapping_add(4)
+                .wrapping_add((Self::sign_extend(imm) << 2) as u32),
+        );
+        Ok(())
+    }
+
     fn slti(self, cpu: &mut EmotionEngine) -> Result {
-        let imm = self.immediate() as i16 as i64;
+        let imm = self.immediate() as i16 as i32;
         let dst = self.rt();
         let src = self.rs();
         trace_asm!(
@@ -91,8 +116,9 @@ impl Instruction {
             Self::gpr_name(dst),
             Self::gpr_name(src),
         );
-        let value = cpu.read_gpr::<i64>(src, 0);
-        cpu.write_gpr(dst, (value < imm) as i64, 0);
+        let value = cpu.read_gpr::<i32>(src, 0);
+        let result = if value < imm { 1 } else { 0 };
+        cpu.write_gpr(dst, result as i64, 0);
         Ok(())
     }
 
