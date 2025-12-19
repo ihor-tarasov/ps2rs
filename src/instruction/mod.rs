@@ -78,6 +78,7 @@ impl Instruction {
             0x00 => special::execute(cpu, self),
             0x05 => self.bne(cpu),
             0x0A => self.slti(cpu),
+            0x0D => self.ori(cpu),
             0x0F => self.lui(cpu),
             0x10 => cop0::execute(cpu, self),
             opcode => Err(Error::Opcode(opcode)),
@@ -120,6 +121,20 @@ impl Instruction {
         let value = cpu.read_gpr::<i32>(src, 0);
         let result = if value < imm { 1 } else { 0 };
         cpu.write_gpr(dst, result as i64, 0);
+        Ok(())
+    }
+
+    fn ori(self, cpu: &mut EmotionEngine) -> Result {
+        let imm = self.immediate();
+        let dst = self.rt();
+        let src = self.rs();
+        trace_asm!(
+            "ori ${}, ${}, ${imm:04X}",
+            Self::gpr_name(dst),
+            Self::gpr_name(src),
+        );
+        let result = cpu.read_gpr::<u32>(src, 0) | imm as u32;
+        cpu.write_gpr::<u32>(dst, result, 0);
         Ok(())
     }
 
