@@ -70,6 +70,12 @@ impl EmotionEngine {
         }
     }
 
+    pub fn jp(&mut self, address: u32) {
+        self.branch = true;
+        self.next_pc = address;
+        self.delay = 1;
+    }
+
     pub fn mfc0(&mut self, register: u8, cop_register: u8) {
         let value = self.cop0.mfc(cop_register);
         self.write_gpr(register, value as i64 as i32 as i64, 0);
