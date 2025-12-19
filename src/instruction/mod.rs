@@ -38,6 +38,10 @@ impl Instruction {
         Self(bytes)
     }
 
+    pub fn is_nop(self) -> bool {
+        self.0 == [0; 4]
+    }
+
     pub const fn opcode(self) -> u8 {
         self.0[3] >> 2
     }

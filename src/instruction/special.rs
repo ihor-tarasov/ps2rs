@@ -13,6 +13,11 @@ pub fn execute(cpu: &mut EmotionEngine, instruction: Instruction) -> Result {
 }
 
 fn sll(cpu: &mut EmotionEngine, instruction: Instruction) -> Result {
+    if instruction.is_nop() {
+        trace_asm!("nop");
+        return Ok(());
+    }
+
     let src = instruction.rt();
     let dst = instruction.rd();
     let shift = instruction.shamt();

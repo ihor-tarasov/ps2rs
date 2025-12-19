@@ -78,7 +78,7 @@ impl EmotionEngine {
 
     pub fn mfc0(&mut self, register: u8, cop_register: u8) {
         let value = self.cop0.mfc(cop_register);
-        self.write_gpr(register, value as i64 as i32 as i64, 0);
+        self.write_gpr::<u32>(register, value, 0);
     }
 
     pub fn read_gpr<T>(&mut self, index: u8, offset: u8) -> T
