@@ -3,36 +3,62 @@ mod special;
 
 use crate::{EmotionEngine, Error, Result};
 
+/*
+        24       16        8        0
+         |        |        |        |
+ +--------+--------+--------+--------+
+     3        2        1        0
+ +--------+--------+--------+--------+
+  ||||||++ +++||||| +++++||| ||++++++
+  opcode  rs    rt   rd   shamt funct
+ +--------+--------+--------+--------+
+         | |||||||| |||||||| ||||||||
+                  target
+ +--------+--------+--------+--------+
+                    |||||||| ||||||||
+                        immediate
+*/
 #[derive(Clone, Copy)]
-pub struct Instruction(u32);
+pub struct Instruction([u8; 4]);
 
 impl Instruction {
-    pub const fn from_u32(v: u32) -> Self {
-        Self(v)
+    pub const fn from_le_bytes(bytes: [u8; 4]) -> Self {
+        Self(bytes)
     }
 
-    pub const fn opcode(self) -> u32 {
-        self.0 >> 26
+    pub const fn opcode(self) -> u8 {
+        self.0[3] >> 2
     }
 
-    pub const fn special_opcode(self) -> u32 {
-        self.0 & 0x3F
+    pub const fn funct(self) -> u8 {
+        self.0[0] & 0b11_1111
     }
 
-    pub const fn rs(self) -> u32 {
-        (self.0 >> 21) & 0x1F
+    pub const fn rs(self) -> u8 {
+        (self.0[2] >> 5) | ((self.0[3] & 0b11) << 3)
     }
 
-    pub const fn rt(self) -> u32 {
-        (self.0 >> 16) & 0x1F
+    pub const fn rt(self) -> u8 {
+        self.0[2] & 0b11111
     }
 
-    pub const fn rd(self) -> u32 {
-        (self.0 >> 11) & 0x1F
+    pub const fn rd(self) -> u8 {
+        self.0[1] >> 3
     }
 
-    pub const fn shamt(self) -> u32 {
-        (self.0 >> 6) & 0x1F
+    pub const fn shamt(self) -> u8 {
+        (self.0[0] >> 6) | ((self.0[1] & 0b111) << 2)
+    }
+
+    pub const fn target(self) -> u32 {
+        (self.0[0] as u32)
+            | ((self.0[1] as u32) << 8)
+            | ((self.0[2] as u32) << 16)
+            | (((self.0[3] & 0b1) as u32) << 24)
+    }
+
+    pub const fn immediate(self) -> u16 {
+        (self.0[0] as u16) | ((self.0[1] as u16) << 8)
     }
 
     pub fn execute(self, cpu: &mut EmotionEngine) -> Result {

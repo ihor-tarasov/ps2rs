@@ -11,7 +11,7 @@ impl Coprocessor0 {
         }
     }
 
-    pub const fn mfc(&self, index: u32) -> u32 {
+    pub const fn mfc(&self, index: u8) -> u32 {
         self.registers[index as usize]
     }
 }

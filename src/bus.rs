@@ -16,10 +16,10 @@ impl<'a> Bus<'a> {
         Self { bios }
     }
 
-    pub const fn read_u32(&self, address: u32) -> Result<u32> {
+    pub const fn read4(&self, address: u32) -> Result<[u8; 4]> {
         match address {
             Self::BIOS_START..=Self::BIOS_END => {
-                Ok(utils::read_u32_from_slice(self.bios, address & 0x3F_FFFF))
+                Ok(utils::read4_from_slice(self.bios, address & 0x3F_FFFF))
             }
             _ => Err(Error::ReadU32(address)),
         }
