@@ -78,6 +78,7 @@ impl Instruction {
             0x00 => special::execute(cpu, self),
             0x05 => self.bne(cpu),
             0x0A => self.slti(cpu),
+            0x0F => self.lui(cpu),
             0x10 => cop0::execute(cpu, self),
             opcode => Err(Error::Opcode(opcode)),
         }
@@ -119,6 +120,20 @@ impl Instruction {
         let value = cpu.read_gpr::<i32>(src, 0);
         let result = if value < imm { 1 } else { 0 };
         cpu.write_gpr(dst, result as i64, 0);
+        Ok(())
+    }
+
+    fn lui(self, cpu: &mut EmotionEngine) -> Result {
+        let imm = self.immediate();
+        let dst = self.rt();
+
+        trace_asm!("lui ${}, ${imm:04X}", Self::gpr_name(dst));
+
+        // LUI places imm in bits 31..16, lower 16 bits are zero.
+        // The 32-bit result is then sign-extended when written to the GPR.
+        let value = ((imm as u32) << 16) as i32;
+
+        cpu.write_gpr::<i32>(dst, value, 0);
         Ok(())
     }
 
