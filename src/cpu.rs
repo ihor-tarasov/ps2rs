@@ -1,4 +1,4 @@
-use crate::{Bus, Error, Result, cop0::Coprocessor0, instruction};
+use crate::{Bus, Instruction, Result, cop0::Coprocessor0};
 
 pub struct EmotionEngine {
     pc: u32,
@@ -28,7 +28,7 @@ impl EmotionEngine {
 
     pub fn step(&mut self, bus: &mut Bus) -> Result {
         let instruction = self.read_u32(bus, self.pc)?;
-        instruction::execute(self, instruction)?;
+        Instruction::from_u32(instruction).execute(self)?;
         self.pc += 4;
         Ok(())
     }
@@ -37,13 +37,9 @@ impl EmotionEngine {
         bus.read_u32(address & 0x1FFF_FFFF)
     }
 
-    pub fn mfc(&mut self, cop_id: u32, register: u32, cop_register: u32) -> Result {
-        let value = match cop_id {
-            0 => self.cop0.mfc(cop_register),
-            _ => return Err(Error::MfcCopId(cop_id as u8)),
-        };
+    pub fn mfc0(&mut self, register: u32, cop_register: u32) {
+        let value = self.cop0.mfc(cop_register);
         self.write_register_i64(register, value as i64 as i32 as i64, 0);
-        Ok(())
     }
 
     pub fn read_register_u32(&mut self, index: u32, offset: u32) -> u32 {
