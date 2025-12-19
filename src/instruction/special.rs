@@ -11,7 +11,11 @@ fn sll(cpu: &mut EmotionEngine, instruction: Instruction) -> Result {
     let src = instruction.rt();
     let dst = instruction.rd();
     let shift = instruction.shamt();
-    log::info!("sll {{{dst}}} {{{src}}} {shift}");
+    log::info!(
+        "sll ${}, ${}, {shift}",
+        EmotionEngine::GPR_NAMES[dst as usize],
+        EmotionEngine::GPR_NAMES[src as usize]
+    );
     let mut value = cpu.read_gpr::<u32>(src, 0) as u64;
     value <<= shift;
     cpu.write_gpr(dst, value as i64, 0);

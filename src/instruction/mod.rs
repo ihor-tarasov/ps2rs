@@ -74,7 +74,11 @@ impl Instruction {
         let imm = self.immediate() as i16 as i64;
         let dst = self.rt();
         let src = self.rs();
-        log::info!("slti {{{dst}}}, {{{src}}}, {imm}");
+        log::info!(
+            "slti ${}, ${}, {imm}",
+            EmotionEngine::GPR_NAMES[dst as usize],
+            EmotionEngine::GPR_NAMES[src as usize]
+        );
         let value = cpu.read_gpr::<i64>(src, 0);
         cpu.write_gpr(dst, (value < imm) as i64, 0);
         Ok(())
