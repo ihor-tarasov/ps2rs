@@ -1,4 +1,4 @@
-use crate::{Bus, Instruction, Result, cop0::Coprocessor0};
+use crate::{Bus, Coprocessor0, Instruction, Result};
 
 pub struct EmotionEngine {
     pc: u32,
@@ -18,9 +18,18 @@ impl EmotionEngine {
     const PC_START: u32 = 0xBFC0_0000;
 
     pub const fn new() -> Self {
+        let mut cop0 = Coprocessor0::new();
+        // The PS2 BIOS reads this register as the very first instruction:
+        //   mfc0 $at, $15
+        //
+        // If this value does not identify an Emotion Engine (R5900),
+        // the BIOS will assume an unsupported CPU and stop execution.
+        //
+        // 0x2E20 is the expected implementation/revision value for the EE.
+        cop0.mtc(Coprocessor0::PRID, 0x0000_2E20);
         Self {
             pc: Self::PC_START,
-            cop0: Coprocessor0::new(),
+            cop0,
             gpr: [0; Self::REGISTERS_COUNT],
         }
     }
