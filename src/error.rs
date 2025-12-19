@@ -5,6 +5,7 @@ pub enum Error {
     Opcode(u32),
     Cop { cop_id: u8, opcode: u8 },
     MfcCopId(u8),
+    SpecialOpcode(u8),
 }
 
 impl fmt::Debug for Error {
@@ -17,6 +18,7 @@ impl fmt::Debug for Error {
                 "Unknown cop instruction, cop id: {cop_id}, opcode: 0x{opcode:02X}"
             ),
             Self::MfcCopId(cop_id) => write!(f, "Unknown mfc cop id: {cop_id}"),
+            Self::SpecialOpcode(opcode) => write!(f, "Unknown special opcode 0x{opcode:02X}"),
         }
     }
 }

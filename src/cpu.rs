@@ -46,6 +46,13 @@ impl EmotionEngine {
         Ok(())
     }
 
+    pub fn read_register_u32(&mut self, index: u32, offset: u32) -> u32 {
+        let start = (index << Self::REGISTER_SIZE_SHIFT) + (offset << 2);
+        let end_exclusive = start + 4;
+        let bytes = &self.registers[(start as usize)..(end_exclusive as usize)];
+        u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]])
+    }
+
     pub fn write_register_i32(&mut self, index: u32, value: i32, offset: u32) {
         let start = (index << Self::REGISTER_SIZE_SHIFT) + (offset << 2);
         let end_exclusive = start + 4;

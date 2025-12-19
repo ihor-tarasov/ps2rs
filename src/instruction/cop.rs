@@ -15,6 +15,6 @@ pub fn execute(cpu: &mut EmotionEngine, instruction: u32) -> Result {
 fn mfc(cpu: &mut EmotionEngine, instruction: u32, cop_id: u32) -> Result {
     let cpu_register = (instruction >> 16) & 0x1F;
     let cop_register = (instruction >> 11) & 0x1F;
-    log::trace!("mfc{cop_id} {cpu_register} {cop_register}");
+    log::info!("mfc{cop_id} {cpu_register} {cop_register}");
     cpu.mfc(cop_id, cpu_register, cop_register)
 }
