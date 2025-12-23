@@ -45,4 +45,14 @@ impl Bus {
             _ => Err(Error::ReadU32(address)),
         }
     }
+
+    pub fn write_u32(&mut self, address: u32, value: u32) {
+        match address {
+            0xB000_F500 => {
+                // TODO: DMA start
+                println!("DMAC kick 0x{value:08X}");
+            }
+            _ => panic!("Try to write 0x{value:04X} to unknown address: 0x{address:08X}"),
+        }
+    }
 }

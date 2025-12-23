@@ -1,7 +1,7 @@
 mod cop0;
 mod special;
 
-use crate::{EmotionEngine, Error, Result};
+use crate::{Bus, EmotionEngine, Error, Result};
 
 #[macro_export]
 macro_rules! trace_asm {
@@ -77,14 +77,16 @@ impl Instruction {
         (self.0[0] as u16) | ((self.0[1] as u16) << 8)
     }
 
-    pub fn execute(self, cpu: &mut EmotionEngine) -> Result {
+    pub fn execute(self, bus: &mut Bus, cpu: &mut EmotionEngine) -> Result {
         match self.opcode() {
             0x00 => special::execute(cpu, self),
             0x05 => self.bne(cpu),
+            0x09 => self.addiu(cpu),
             0x0A => self.slti(cpu),
             0x0D => self.ori(cpu),
             0x0F => self.lui(cpu),
             0x10 => cop0::execute(cpu, self),
+            0x2B => self.sw(bus, cpu),
             opcode => Err(Error::Opcode(opcode)),
         }
     }
@@ -106,6 +108,16 @@ impl Instruction {
                 .wrapping_add(4)
                 .wrapping_add((Self::sign_extend(imm) << 2) as u32),
         );
+        Ok(())
+    }
+
+    fn addiu(self, cpu: &mut EmotionEngine) -> Result {
+        let imm = self.immediate() as i16;
+        let dst = self.rt();
+        let src = self.rs();
+        trace_asm!("addiu ${}, ${}, {imm}", gpr_name(dst), gpr_name(src));
+        let value = cpu.read_gpr_i32(src) + imm as i32;
+        cpu.write_gpr_i64(dst, value as i64);
         Ok(())
     }
 
@@ -141,6 +153,17 @@ impl Instruction {
         let value = ((imm as u32) << 16) as i32;
 
         cpu.write_gpr_i32(dst, value);
+        Ok(())
+    }
+
+    fn sw(self, bus: &mut Bus, cpu: &mut EmotionEngine) -> Result {
+        let offset = self.immediate() as i16;
+        let src = self.rt();
+        let base = self.rs();
+        trace_asm!("sw ${}, {offset}({})", gpr_name(src), gpr_name(base));
+        let addr = cpu.read_gpr_u32(base).wrapping_add_signed(offset as i32);
+        let value = cpu.read_gpr_u32(src);
+        cpu.write_u32(bus, addr, value);
         Ok(())
     }
 }

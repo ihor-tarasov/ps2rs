@@ -8,6 +8,7 @@ pub fn execute(cpu: &mut EmotionEngine, instruction: Instruction) -> Result {
     match instruction.funct() {
         0x00 => sll(cpu, instruction),
         0x08 => jr(cpu, instruction),
+        0x0F => sync(cpu, instruction),
         opcode => Err(Error::Special(opcode)),
     }
 }
@@ -34,5 +35,12 @@ fn jr(cpu: &mut EmotionEngine, instruction: Instruction) -> Result {
     let address = cpu.read_gpr_u32(rs);
     // TODO: Check alignment of address
     cpu.jp(address);
+    Ok(())
+}
+
+fn sync(_cpu: &mut EmotionEngine, _instruction: Instruction) -> Result {
+    // SYNC
+    // TODO: Sync memory
+    trace_asm!("sync");
     Ok(())
 }

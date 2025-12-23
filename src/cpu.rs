@@ -52,7 +52,7 @@ impl EmotionEngine {
             self.branch = false;
         }
         let instruction = Instruction::from_le_bytes(self.read4(bus, self.pc)?);
-        instruction.execute(self)?;
+        instruction.execute(bus, self)?;
         self.cop0.increment_count();
         self.pc += 4;
         Ok(())
@@ -60,6 +60,13 @@ impl EmotionEngine {
 
     pub fn read4(&self, bus: &Bus, address: u32) -> Result<[u8; 4]> {
         bus.read4(address & 0x1FFF_FFFF)
+    }
+
+    pub fn write_u32(&mut self, bus: &mut Bus, address: u32, value: u32) {
+        if address & 0b11 != 0 {
+            panic!("Unaligned write of u32 to bus");
+        }
+        bus.write_u32(address, value);
     }
 
     pub fn branch(&mut self, condition: bool, address: u32) {
